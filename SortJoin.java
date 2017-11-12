@@ -4,7 +4,15 @@ import java.util.*;
 
 class SortJoin {
 	
+    private final int tuplesPerBlock = 100;
+    private int M = 50; // Number of blocks in main memory
 
+    // Constructor
+    SortJoin(int M) {
+        if (M > 0) {
+            this.M = M;
+        }
+    }
 	public static Comparator<String> getComparator() {
         return new Comparator<String>() {
             public int compare(String s1, String s2) {
@@ -21,16 +29,52 @@ class SortJoin {
         };
     }
 
-
-	public static void main(String[] args) {
-		String filepath = "input/R";
-        String outpath = "input/output";
+    public void open(String fileR) {
+        String outpath = "tmp/output";
         PrintWriter writer = null;
-        String[] Data = new String[1000];
+
+        int tupleLimit = tuplesPerBlock * M;
+        int lineCount = 0;
+
+        String[] Data = new String[tupleLimit];
+
+        try (BufferedReader br = new BufferedReader(new FileReader(fileR))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+            // process the line.
+                if (lineCount < tupleLimit) {
+                    Data[lineCount] = line;
+                }
+                lineCount += 1;
+            }
+
+            System.out.println("# tupleLimit = " + tupleLimit);
+            System.out.println("length of data = "  + Data.length);
+
+        }
+
+        catch(IOException e){
+            System.out.println("Failed to open the Input File" + e);
+            System.exit(1);
+        }
+
+        catch(Exception e){
+            System.out.println(e);
+            System.exit(1);
+        }
+
 
         // Open the Output File
         try {
-		  writer = new PrintWriter(new FileWriter(outpath));
+            writer = new PrintWriter(new FileWriter(outpath));
+            // Now Sort Data
+            //Arrays.sort(Data, getComparator());
+
+            // Save the sorted Data 
+            for (int i=0; i<tupleLimit; i++) {
+                writer.println(Data[i]);
+            }
+            System.out.println("i = " + i);
         }
         catch(IOException e){
             System.out.println("Failed to open the Output File" + e);
@@ -41,57 +85,21 @@ class SortJoin {
             System.exit(1);
         }
 
-		// BufferedWriter fout;
-        int lineCount = 0;
+    }
+
+	public static void main(String[] args) {
+        // TODO - command line inputs
+        int M = 50;
+		String fileR = "input/R";
+           
+        SortJoin sortJoin = new SortJoin(80);
 
 		long startTime = System.currentTimeMillis();
-		
+        sortJoin.open(fileR);
 
-        try (BufferedReader br = new BufferedReader(new FileReader(filepath))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-            // process the line.
-                if (lineCount < 1000) {
-                    Data[lineCount] = line;
-                }
-                lineCount += 1;
-			}
-
-            System.out.println("# records = " + lineCount);
-            // Now Sort Data
-            Arrays.sort(Data, getComparator());
-
-            // Save the sorted Data
-            
-            
-            for (int i=0; i<1000; i++) {
-            	writer.println(Data[i]);
-            }
-
-            //fout.flush();
-            writer.close();
-
-            
-            //System.out.println("col1: " + new String(col1));
-            //System.out.println("Bytes Read: " + bytesRead);
-
-            long endTime = System.currentTimeMillis();
-			long totalTime = endTime - startTime;
-			System.out.println(totalTime);
-
-
-			// System.out.println(fin.read());
-		}
-
-		catch(IOException e){
-            System.out.println("Failed to open the Input File" + e);
-            System.exit(1);
-        }
-
-        catch(Exception e){
-            System.out.println(e);
-            System.exit(1);
-        }
+        long endTime = System.currentTimeMillis();
+        long totalTime = endTime - startTime;
+        System.out.println(totalTime);
 
 
 	}
