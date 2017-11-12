@@ -5,84 +5,18 @@ import java.util.*;
 class SortJoin {
 	
 
-	public static Comparator<byte[]> decending(final Comparator<byte[]> other) {
-        return new Comparator<byte[]>() {
-            public int compare(byte[] o1, byte[] o2) {
-                return -1 * other.compare(o1, o2);
-            }
-        };
-    }
+	public static Comparator<String> getComparator() {
+        return new Comparator<String>() {
+            public int compare(String s1, String s2) {
+                String[] parts1 = s1.split(" ");
+                String X1 = parts1[0]; // 004
+                String Y1 = parts1[1]; // 034556
 
-	public static Comparator<byte[]> getComparator(final int... multipleOptions) {
-        return new Comparator<byte[]>() {
-            public int compare(byte[] o1, byte[] o2) {
-            	byte[] c1, c2;
-            	String s1, s2;
-            	int result = 0;
+                String[] parts2 = s2.split(" ");
+                String X2 = parts2[0]; // 004
+                String Y2 = parts2[1]; // 034556
 
-                for (int option : multipleOptions) {
-             
-                	// sort by first column
-                	if (option == 0) { 
-                    	c1 = new byte[10];
-                    	c2 = new byte[10];
-                    	for (int i=0; i<10; i++) { 
-                    		// copy first 10 bytes 
-                    		c1[i] = o1[i];
-                    		c2[i] = o2[i];
-                    	}
-
-                    	s1 = new String(c1);
-                    	s2 = new String(c2);
-
-                    	result = s1.compareTo(s2);
-
-                    	if (result != 0) {
-                        return result;
-                    	}
-                    }	
-
-                    // sort by second column
-                    if (option == 1) { 
-                    	c1 = new byte[32];
-                    	c2 = new byte[32];
-                    	for (int i=11; i<43; i++) { 
-                    		// copy first 10 bytes 
-                    		c1[i] = o1[i];
-                    		c2[i] = o2[i];
-                    	}
-
-                    	s1 = new String(c1);
-                    	s2 = new String(c2);
-
-                    	result = s1.compareTo(s2);
-                    	
-                    	if (result != 0) {
-                        return result;
-                    	}
-                    }	
-
-                    // sort by third column
-                    if (option == 2) { 
-                    	c1 = new byte[54];
-                    	c2 = new byte[54];
-                    	for (int i=44; i<98; i++) { 
-                    		// copy first 10 bytes 
-                    		c1[i] = o1[i];
-                    		c2[i] = o2[i];
-                    	}
-
-                    	s1 = new String(c1);
-                    	s2 = new String(c2);
-
-                    	result = s1.compareTo(s2);
-                    	
-                    	if (result != 0) {
-                        return result;
-                    	}
-                    }	
-                }
-                return result;
+            	return Y1.compareTo(Y2);
             }
         };
     }
@@ -91,10 +25,20 @@ class SortJoin {
 	public static void main(String[] args) {
 		String filepath = "input/R";
         String outpath = "input/output";
-        PrintWriter pw;
+        PrintWriter writer = null;
+        String[] Data = new String[1000];
 
+        // Open the Output File
         try {
-		  PrintWriter pw = new PrintWriter(new FileWriter(outpath));
+		  writer = new PrintWriter(new FileWriter(outpath));
+        }
+        catch(IOException e){
+            System.out.println("Failed to open the Output File" + e);
+            System.exit(1);
+        }
+        catch(Exception e){
+            System.out.println(e);
+            System.exit(1);
         }
 
 		// BufferedWriter fout;
@@ -107,24 +51,25 @@ class SortJoin {
             String line;
             while ((line = br.readLine()) != null) {
             // process the line.
-                if (lineCount < 10) {
-                    System.out.println(line);
+                if (lineCount < 1000) {
+                    Data[lineCount] = line;
                 }
                 lineCount += 1;
 			}
 
+            System.out.println("# records = " + lineCount);
             // Now Sort Data
-            //Arrays.sort(Data, getComparator(0));
+            Arrays.sort(Data, getComparator());
 
             // Save the sorted Data
             
             
-            /*for (int i=0; i<total_num_records; i++) {
-            	fout.write(Data[i]);
+            for (int i=0; i<1000; i++) {
+            	writer.println(Data[i]);
             }
 
-            fout.flush();*/
-            pw.close();
+            //fout.flush();
+            writer.close();
 
             
             //System.out.println("col1: " + new String(col1));
