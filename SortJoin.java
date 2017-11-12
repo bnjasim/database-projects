@@ -74,7 +74,10 @@ class SortJoin {
             for (int i=0; i<tupleLimit; i++) {
                 writer.println(Data[i]);
             }
-            System.out.println("i = " + i);
+
+            writer.flush();
+            writer.close();
+            // System.out.println("i = " + i);
         }
         catch(IOException e){
             System.out.println("Failed to open the Output File" + e);
