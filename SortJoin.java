@@ -29,12 +29,15 @@ class SortJoin {
         };
     }
 
+    
+
     public void open(String fileR) {
-        String outpath = "tmp/output";
+        String outpath = "tmp/";
         PrintWriter writer = null;
 
         int tupleLimit = tuplesPerBlock * M;
         int lineCount = 0;
+        int fileCount = 1;
 
         String[] Data = new String[tupleLimit];
 
@@ -45,11 +48,46 @@ class SortJoin {
                 if (lineCount < tupleLimit) {
                     Data[lineCount] = line;
                 }
+                else {
+                    // reset line count
+                    lineCount = 0;
+
+                    // write to output file
+                    // Open the Output File
+                    try {
+                        String outfile = outpath + "R" + fileCount;
+                        writer = new PrintWriter(new FileWriter(outfile));
+                        // Now Sort Data
+                        Arrays.sort(Data, getComparator());
+
+                        // Save the sorted Data 
+                        for (int i=0; i<tupleLimit; i++) {
+                            writer.println(Data[i]);
+                        }
+
+                        writer.flush();
+                        writer.close();
+                        // System.out.println("i = " + i);
+                    }
+                    catch(IOException e){
+                        System.out.println("Failed to open the Output File" + fileCount + "  " + e);
+                        System.exit(1);
+                    }
+                    catch(Exception e){
+                        System.out.println(e);
+                        System.exit(1);
+                    }
+
+                    fileCount += 1;
+
+                }
                 lineCount += 1;
             }
 
+            // The last file also need to be written
+
+
             System.out.println("# tupleLimit = " + tupleLimit);
-            System.out.println("length of data = "  + Data.length);
 
         }
 
@@ -63,31 +101,6 @@ class SortJoin {
             System.exit(1);
         }
 
-
-        // Open the Output File
-        try {
-            writer = new PrintWriter(new FileWriter(outpath));
-            // Now Sort Data
-            //Arrays.sort(Data, getComparator());
-
-            // Save the sorted Data 
-            for (int i=0; i<tupleLimit; i++) {
-                writer.println(Data[i]);
-            }
-
-            writer.flush();
-            writer.close();
-            // System.out.println("i = " + i);
-        }
-        catch(IOException e){
-            System.out.println("Failed to open the Output File" + e);
-            System.exit(1);
-        }
-        catch(Exception e){
-            System.out.println(e);
-            System.exit(1);
-        }
-
     }
 
 	public static void main(String[] args) {
@@ -95,7 +108,7 @@ class SortJoin {
         int M = 50;
 		String fileR = "input/R";
            
-        SortJoin sortJoin = new SortJoin(80);
+        SortJoin sortJoin = new SortJoin(50);
 
 		long startTime = System.currentTimeMillis();
         sortJoin.open(fileR);
