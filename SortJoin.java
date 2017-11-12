@@ -57,7 +57,7 @@ class SortJoin {
         }
     }
 
-    public void open(String fileR) {
+    public void open(String fileR, String fileS) {
         String outpath = "tmp/";
 
         int tupleLimit = tuplesPerBlock * M;
@@ -66,6 +66,7 @@ class SortJoin {
 
         String[] Data = new String[tupleLimit];
 
+        // For the Relation R
         try (BufferedReader br = new BufferedReader(new FileReader(fileR))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -96,6 +97,53 @@ class SortJoin {
             Arrays.sort(Data, getComparator());
             write_to_file(Data, outfile, lineCount);
 
+            // System.out.println("# tupleLimit = " + tupleLimit);
+
+        }
+
+        catch(IOException e){
+            System.out.println("Failed to open the Input File" + e);
+            System.exit(1);
+        }
+
+        catch(Exception e){
+            System.out.println(e);
+            System.exit(1);
+        }
+
+
+        // For the Relation S
+        fileCount = 0;
+        try (BufferedReader br = new BufferedReader(new FileReader(fileS))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+            // process the line.
+                if (lineCount < tupleLimit) {
+                    Data[lineCount] = line;
+                }
+                else {
+
+                    String outfile = outpath + "S" + fileCount;
+                    // Now Sort Data
+                    Arrays.sort(Data, getComparator());
+                    write_to_file(Data, outfile, lineCount);
+
+                    // reset line count
+                    lineCount = 0;
+                    // We shouldn't miss the current line just read
+                    Data[0] = line;
+                    fileCount += 1;
+
+                }
+                lineCount += 1;
+            }
+
+            // The last file also need to be written
+            String outfile = outpath + "S" + fileCount;
+            // Now Sort Data
+            Arrays.sort(Data, getComparator());
+            write_to_file(Data, outfile, lineCount);
+
             System.out.println("# tupleLimit = " + tupleLimit);
 
         }
@@ -116,11 +164,13 @@ class SortJoin {
         // TODO - command line inputs
         int M = 50;
 		String fileR = "input/R";
+        String fileS = "input/S";
            
         SortJoin sortJoin = new SortJoin(50);
 
 		long startTime = System.currentTimeMillis();
-        sortJoin.open(fileR);
+        
+        sortJoin.open(fileR, fileS);
 
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
