@@ -13,18 +13,25 @@ class SortJoin {
             this.M = M;
         }
     }
-	public static Comparator<String> getComparator() {
+	public static Comparator<String> getComparator(final int attr) {
         return new Comparator<String>() {
             public int compare(String s1, String s2) {
                 String[] parts1 = s1.split(" ");
-                String X1 = parts1[0]; // 004
-                String Y1 = parts1[1]; // 034556
+                //String X1 = parts1[0]; // 004
+                //String Y1 = parts1[1]; // 034556
 
                 String[] parts2 = s2.split(" ");
-                String X2 = parts2[0]; // 004
-                String Y2 = parts2[1]; // 034556
+                //String X2 = parts2[0]; // 004
+                //String Y2 = parts2[1]; // 034556
 
-            	return Y1.compareTo(Y2);
+            	//return Y1.compareTo(Y2);
+
+                // Safety code: attr can be 0 or 1 as there are only 2 attributes
+                if (attr > 1 || attr <0) {
+                    return 0;
+                }
+
+                return parts1[attr].compareTo(parts2[attr]);
             }
         };
     }
@@ -78,7 +85,7 @@ class SortJoin {
 
                     String outfile = outpath + "R" + fileCount;
                     // Now Sort Data
-                    Arrays.sort(Data, getComparator());
+                    Arrays.sort(Data, getComparator(1));
                     write_to_file(Data, outfile, lineCount);
 
                     // reset line count
@@ -94,7 +101,7 @@ class SortJoin {
             // The last file also need to be written
             String outfile = outpath + "R" + fileCount;
             // Now Sort Data
-            Arrays.sort(Data, getComparator());
+            Arrays.sort(Data, getComparator(1));
             write_to_file(Data, outfile, lineCount);
 
             // System.out.println("# tupleLimit = " + tupleLimit);
@@ -113,7 +120,8 @@ class SortJoin {
 
 
         // For the Relation S
-        fileCount = 0;
+        lineCount = 0;
+        fileCount = 1;
         try (BufferedReader br = new BufferedReader(new FileReader(fileS))) {
             String line;
             while ((line = br.readLine()) != null) {
@@ -125,7 +133,7 @@ class SortJoin {
 
                     String outfile = outpath + "S" + fileCount;
                     // Now Sort Data
-                    Arrays.sort(Data, getComparator());
+                    Arrays.sort(Data, getComparator(0));
                     write_to_file(Data, outfile, lineCount);
 
                     // reset line count
@@ -141,7 +149,7 @@ class SortJoin {
             // The last file also need to be written
             String outfile = outpath + "S" + fileCount;
             // Now Sort Data
-            Arrays.sort(Data, getComparator());
+            Arrays.sort(Data, getComparator(0));
             write_to_file(Data, outfile, lineCount);
 
             System.out.println("# tupleLimit = " + tupleLimit);
