@@ -174,14 +174,14 @@ class SortJoin {
 
     }
 
-    private int find_minimum(String[] arr, int col) {
+    private int find_minimum(String[] arr) {
         String m = arr[0];
         int index = 0;
 
         for (int i=1; i<arr.length; i++) {
             // System.out.println("i = " + i);
             //if (arr[i].compareTo(m) < 0) {
-            if (getComparator(col).compare(arr[i], m) < 0) {
+            if (getComparator(1).compare(arr[i], m) < 0) {
                 m = arr[i];
                 index = i;
             }
@@ -223,7 +223,7 @@ class SortJoin {
             }
 
             // Find the minimum y in R
-            int min_index = find_minimum(tupleS, 0);
+            int min_index = find_minimum(tupleR);
             System.out.println("min index = " + min_index);
 
         }
