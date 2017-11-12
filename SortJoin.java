@@ -29,11 +29,36 @@ class SortJoin {
         };
     }
 
-    
+    private void write_to_file(String[] Data, String outfile, int num_lines) {
+        // write to output file
+        // Open the Output File
+        PrintWriter writer = null;
+
+        try {
+            
+            writer = new PrintWriter(new FileWriter(outfile));
+
+            // Save the sorted Data 
+            for (int i=0; i<num_lines; i++) {
+                writer.println(Data[i]);
+            }
+
+            writer.flush();
+            writer.close();
+            // System.out.println("i = " + i);
+        }
+        catch(IOException e){
+            System.out.println("Failed to open the Output File" + outfile + "\n" + e);
+            System.exit(1);
+        }
+        catch(Exception e){
+            System.out.println(e);
+            System.exit(1);
+        }
+    }
 
     public void open(String fileR) {
         String outpath = "tmp/";
-        PrintWriter writer = null;
 
         int tupleLimit = tuplesPerBlock * M;
         int lineCount = 0;
@@ -49,35 +74,16 @@ class SortJoin {
                     Data[lineCount] = line;
                 }
                 else {
+
+                    String outfile = outpath + "R" + fileCount;
+                    // Now Sort Data
+                    Arrays.sort(Data, getComparator());
+                    write_to_file(Data, outfile, lineCount);
+
                     // reset line count
                     lineCount = 0;
-
-                    // write to output file
-                    // Open the Output File
-                    try {
-                        String outfile = outpath + "R" + fileCount;
-                        writer = new PrintWriter(new FileWriter(outfile));
-                        // Now Sort Data
-                        Arrays.sort(Data, getComparator());
-
-                        // Save the sorted Data 
-                        for (int i=0; i<tupleLimit; i++) {
-                            writer.println(Data[i]);
-                        }
-
-                        writer.flush();
-                        writer.close();
-                        // System.out.println("i = " + i);
-                    }
-                    catch(IOException e){
-                        System.out.println("Failed to open the Output File" + fileCount + "  " + e);
-                        System.exit(1);
-                    }
-                    catch(Exception e){
-                        System.out.println(e);
-                        System.exit(1);
-                    }
-
+                    // We shouldn't miss the current line just read
+                    Data[0] = line;
                     fileCount += 1;
 
                 }
@@ -85,7 +91,10 @@ class SortJoin {
             }
 
             // The last file also need to be written
-
+            String outfile = outpath + "R" + fileCount;
+            // Now Sort Data
+            Arrays.sort(Data, getComparator());
+            write_to_file(Data, outfile, lineCount);
 
             System.out.println("# tupleLimit = " + tupleLimit);
 
