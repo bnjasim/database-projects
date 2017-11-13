@@ -416,17 +416,23 @@ class SortJoin {
             System.out.println(e);
             System.exit(1);
         }
-
-
     }
 
 	public static void main(String[] args) {
         // TODO - command line inputs
-        int M = 50;
-		String fileR = "input/sample1";
-        String fileS = "input/sample2";
+        if (args.length < 4) {
+            System.out.println(args.length);
+            System.out.println("The correct format is: java SortJoin input/R input/S sort 50");
+            System.exit(1);
+        }
+
+        int M = 50; // default
+		String fileR = args[0]; //"input/R";
+        String fileS = args[1]; //"input/S";
+
+        M = Integer.parseInt(args[3], 10);
            
-        SortJoin sortJoin = new SortJoin(50);
+        SortJoin sortJoin = new SortJoin(M);
 
 		long startTime = System.currentTimeMillis();
         
