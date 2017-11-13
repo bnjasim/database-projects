@@ -38,7 +38,7 @@ class SortJoin {
         };
     }
 
-    private void write_to_file(String[] Data, String outfile, int num_lines) {
+    private void write_to_file(List<String> Data, String outfile, int num_lines) {
         // write to output file
         // Open the Output File
         PrintWriter writer = null;
@@ -49,7 +49,7 @@ class SortJoin {
 
             // Save the sorted Data 
             for (int i=0; i<num_lines; i++) {
-                writer.println(Data[i]);
+                writer.println(Data.get(i));
             }
 
             writer.flush();
@@ -73,7 +73,8 @@ class SortJoin {
         int lineCount = 0;
         int fileCount = 1;
 
-        String[] Data = new String[tupleLimit];
+        // String[] Data = new String[tupleLimit];
+        List<String> Data = new ArrayList<String>();
 
         // For the Relation R
         try (BufferedReader br = new BufferedReader(new FileReader(fileR))) {
@@ -81,19 +82,23 @@ class SortJoin {
             while ((line = br.readLine()) != null) {
             // process the line.
                 if (lineCount < tupleLimit) {
-                    Data[lineCount] = line;
+                    Data.add(line);
+
                 }
                 else {
 
                     String outfile = outpath + "R" + fileCount;
                     // Now Sort Data
-                    Arrays.sort(Data, getComparator(1));
+                    //Arrays.sort(Data, getComparator(1));
+                    Data.sort(getComparator(1));
                     write_to_file(Data, outfile, lineCount);
 
                     // reset line count
                     lineCount = 0;
                     // We shouldn't miss the current line just read
-                    Data[0] = line;
+                    Data.clear();
+                    Data.add(line);
+                    //Data[0] = line;
                     fileCount += 1;
 
                 }
@@ -104,13 +109,11 @@ class SortJoin {
             String outfile = outpath + "R" + fileCount;
             // R Files Count
             RFC = fileCount;
-            for (int i=0; i<Data.length;i++) {
-                System.out.println(Data[i]);
-            }
-            System.out.println("length of Data = "+ Data.length);
-            // Now Sort Data
-            Arrays.sort(Data, getComparator(1));
 
+            System.out.println("length of Data = "+ Data.size());
+            // Now Sort Data
+            //Arrays.sort(Data, getComparator(1));
+            Data.sort(getComparator(1));
             write_to_file(Data, outfile, lineCount);
 
             // System.out.println("# tupleLimit = " + tupleLimit);
@@ -134,22 +137,25 @@ class SortJoin {
         fileCount = 1;
         try (BufferedReader br = new BufferedReader(new FileReader(fileS))) {
             String line;
+            Data.clear();
             while ((line = br.readLine()) != null) {
             // process the line.
                 if (lineCount < tupleLimit) {
-                    Data[lineCount] = line;
+                    Data.add(line);
                 }
                 else {
 
                     String outfile = outpath + "S" + fileCount;
                     // Now Sort Data
-                    Arrays.sort(Data, getComparator(0));
+                    //Arrays.sort(Data, getComparator(0));
+                    Data.sort(getComparator(1));
                     write_to_file(Data, outfile, lineCount);
 
                     // reset line count
                     lineCount = 0;
                     // We shouldn't miss the current line just read
-                    Data[0] = line;
+                    Data.clear();
+                    Data.add(line);
                     fileCount += 1;
 
                 }
@@ -161,7 +167,8 @@ class SortJoin {
             // S Files Count 
             SFC = fileCount;
             // Now Sort Data
-            Arrays.sort(Data, getComparator(0));
+            //Arrays.sort(Data, getComparator(0));
+            Data.sort(getComparator(1));
             write_to_file(Data, outfile, lineCount);
 
             System.out.println("# tupleLimit = " + tupleLimit);
@@ -424,7 +431,7 @@ class SortJoin {
 		long startTime = System.currentTimeMillis();
         
         sortJoin.open(fileR, fileS);
-        //sortJoin.getnext();
+        sortJoin.getnext();
 
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
