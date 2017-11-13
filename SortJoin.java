@@ -175,19 +175,27 @@ class SortJoin {
     }
 
     // Returns the index of which file in R splits having the minimum value
-    private int find_minimum(String[] arr, int col) {
-        String m = arr[0];
-        int index = 0;
+    private int find_minimum(String[] tupleR, boolean[] finishedR, int col) {
+        // String m = arr[0]; // can't do as first sublist may be finished
+        String m = "";
+        int index = -1;
+        int i =0;
 
-        for (int i=1; i<arr.length; i++) {
-            // System.out.println("i = " + i);
-            //if (arr[i].compareTo(m) < 0) {
-            if (getComparator(col).compare(arr[i], m) < 0) {
-                m = arr[i];
+        for (; i<tupleR.length; i++) {
+            if (!finishedR[i]) {
+                m = tupleR[i];
                 index = i;
             }
+        }
+        i += 1;
 
-            
+        for (; i<tupleR.length; i++) {
+            if (!finishedR[i]) {
+                if (getComparator(col).compare(tupleR[i], m) < 0) {
+                    m = tupleR[i];
+                    index = i;
+                }
+            }
         }
         return index;
     }
@@ -272,78 +280,82 @@ class SortJoin {
                 }
             }
 
+            // finished become true only when all finishedR become true or all finishedS become true
+            boolean finished = false;
 
-            // Find the minimum y in R
-            int min_index = find_minimum(tupleR, 1);
-            String y = tupleR[min_index];
-            
-            // Add all tuples with Y=y from R to listR
-            for (int i=0; i<RFC; i++) {
-                while(!finishedR[i]) {
-                    int comp = compare_R_R(y, tupleR[i]);
+            //while(!finished) {
+                // Find the minimum y in R
+                int min_index = find_minimum(tupleR, finishedR, 1);
+                String y = tupleR[min_index];
+                
+                // Add all tuples with Y=y from R to listR
+                for (int i=0; i<RFC; i++) {
+                    while(!finishedR[i]) {
+                        int comp = compare_R_R(y, tupleR[i]);
 
-                    if (comp == 0) {
-                        listR.add(tupleR[i]);
-                        // increment pointer - read next line
-                        tupleR[i] = readerR[i].readLine();
+                        if (comp == 0) {
+                            listR.add(tupleR[i]);
+                            // increment pointer - read next line
+                            tupleR[i] = readerR[i].readLine();
 
-                        if (tupleR[i] == null) {
-                            finishedR[i] = true;
+                            if (tupleR[i] == null) {
+                                finishedR[i] = true;
+                            }
+
                         }
 
-                    }
-
-                    else if (comp < 0) {
-                        break;
-                    }
-
-                    else {
-                        // something seriously wrong
-                        // y is the minimum assumption is wrong or S is not sorted
-                        System.out.println("Fatal Mistake: y is not minimum or S is not sorted\n");
-                        System.exit(1);
-                    }
-                }
-            }
-
-            System.out.println("Number of tuples in R with 000: " + listR.size());
-
-            // Add all tuples with Y=y from S to listS
-            for (int i=0; i<SFC; i++) {
-                while(!finishedS[i]) {
-                    int comp = compare_R_S(y, tupleS[i]);
-
-                    if (comp == 0) {
-                        listS.add(tupleS[i]);
-                        // increment pointer - read next line
-                        tupleS[i] = readerS[i].readLine();
-
-                        if (tupleS[i] == null) {
-                            finishedS[i] = true;
+                        else if (comp < 0) {
+                            break;
                         }
 
-                    }
-
-                    else if (comp < 0) {
-                        break;
-                    }
-
-                    else {
-                        // S is smaller than y, which is possible
-                        // skip
-                        tupleS[i] = readerS[i].readLine();
-
-                        if (tupleS[i] == null) {
-                            finishedS[i] = true;
+                        else {
+                            // something seriously wrong
+                            // y is the minimum assumption is wrong or S is not sorted
+                            System.out.println("Fatal Mistake: y is not minimum or S is not sorted\n");
+                            System.exit(1);
                         }
                     }
                 }
-            }
 
-            System.out.println("Number of tuples in S with 000: " + listS.size());
+                System.out.println("Number of tuples in R with 000: " + listR.size());
 
-            // Cross product of listR and listS
-            write_cross_product(writer, listR, listS);
+                // Add all tuples with Y=y from S to listS
+                for (int i=0; i<SFC; i++) {
+                    while(!finishedS[i]) {
+                        int comp = compare_R_S(y, tupleS[i]);
+
+                        if (comp == 0) {
+                            listS.add(tupleS[i]);
+                            // increment pointer - read next line
+                            tupleS[i] = readerS[i].readLine();
+
+                            if (tupleS[i] == null) {
+                                finishedS[i] = true;
+                            }
+
+                        }
+
+                        else if (comp < 0) {
+                            break;
+                        }
+
+                        else {
+                            // S is smaller than y, which is possible
+                            // skip
+                            tupleS[i] = readerS[i].readLine();
+
+                            if (tupleS[i] == null) {
+                                finishedS[i] = true;
+                            }
+                        }
+                    }
+                }
+
+                System.out.println("Number of tuples in S with 000: " + listS.size());
+
+                // Cross product of listR and listS
+                write_cross_product(writer, listR, listS);
+            //}
 
             writer.flush();
             writer.close();
