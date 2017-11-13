@@ -11,6 +11,25 @@ class HashJoin {
 		this.inverted = inverted;
 	}
 
+	// R(X, Y) join S(Y, Z) result: Q(X, Y, Z)
+    private String join_tuples(String r, String s) {
+        return r + " " + s.split(" ")[1];
+    }
+
+    private void cross_tuples(String line, List<String> match, PrintWriter writer) {
+    	// iterate over match list
+    	for (int i=0; i<match.size(); i++) {
+    		String s = match.get(i);
+
+    		if (!inverted) {
+    			writer.println(join_tuples(line, s));
+    		}
+    		else {
+    			writer.println(join_tuples(s, line));
+    		}
+    	}
+    }
+
 	public void open(String fileS) {
 		// Create a HashTable over S
 		// Location of Y attribute (first or second?)
@@ -62,6 +81,8 @@ class HashJoin {
 		}
 
 		try (BufferedReader br = new BufferedReader(new FileReader(fileR))) {
+			// Output writer
+			PrintWriter writer = new PrintWriter(new FileWriter("input/R_hjoin_S"));
             String line;
             while ((line = br.readLine()) != null) {
             	String key = line.split(" ")[locY];
@@ -69,14 +90,17 @@ class HashJoin {
             	List<String> match = hTable.get(key);
 
             	if (match != null) {
-            		System.out.println(match);
-            		break;
+            		// Write the cross prodcut to the output file
+            		cross_tuples(line, match, writer);
             	}
             	else {
             		System.out.println("Key " + key + "Not found in the Hashtable");
             	}
 
             }
+
+            writer.flush();
+            writer.close();
         }
 
         catch(IOException e){
