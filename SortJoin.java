@@ -174,6 +174,7 @@ class SortJoin {
 
     }
 
+    // Returns the index of which file in R splits having the minimum value
     private int find_minimum(String[] arr, int col) {
         String m = arr[0];
         int index = 0;
@@ -191,6 +192,16 @@ class SortJoin {
         return index;
     }
 
+    // Compare second column of R with first column of S 
+    private int compare_R_S(String r, String s) {
+        return r.split(" ")[1].compareTo(s.split(" ")[0]);
+    }
+
+    // R(X, Y) join S(Y, Z) result: Q(X, Y, Z)
+    private String join_tuples(String r, String s) {
+        return r + " " + s.split(" ")[1];
+    }
+
     public void getnext() {
         // Check if B(S) + B(R) <= M^2
         if (RFC + SFC > M) {
@@ -198,8 +209,12 @@ class SortJoin {
             System.exit(1);
         }
 
+        PrintWriter writer = null;
+
         try {
 
+            // Open the output file
+            writer = new PrintWriter(new FileWriter("input/R_join_S"));
             // Open all the split files
             BufferedReader[] readerR = new BufferedReader[RFC];
             BufferedReader[] readerS = new BufferedReader[SFC];
@@ -223,8 +238,31 @@ class SortJoin {
             }
 
             // Find the minimum y in R
-            int min_index = find_minimum(tupleS, 0);
-            System.out.println("min index = " + min_index);
+            int min_index = find_minimum(tupleR, 1);
+            String y = tupleR[min_index];
+            // System.out.println("min index = " + min_index);
+            for (int i=0; i<SFC; i++) {
+                while(true) {
+                    int comp = compare_R_S(y, tupleS[i]);
+                    // If equal then join
+                    if (comp == 0) {
+                        // write to output file
+                        writer.println(join_tuples(y, tupleS[i]));
+                        // increment pointer, read next line
+                        tupleS[i] = readerS[i].readLine();
+                    }
+                    else if (comp > 0) {
+                        // meaning S is smaller than R, then drop that tuple in S
+                        tupleS[i] = readerS[i].readLine();
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+
+            writer.flush();
+            writer.close();
 
         }
 
