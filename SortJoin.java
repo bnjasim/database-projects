@@ -221,28 +221,45 @@ class SortJoin {
             // tuple* keeps the topmost tuple of all the split files
             String[] tupleR = new String[RFC];
             String[] tupleS = new String[SFC];
+            // keep flags whether the pointers reached end of file
+            boolean[] finishedR = new boolean[RFC];
+            boolean[] finishedS = new boolean[SFC];
+
 
             // Initially read 1 tuple from each of the R and S files
             for (int i=0; i<RFC; i++) {
                 String fname = "tmp/R" + (i+1);
                 readerR[i] = new BufferedReader(new FileReader(fname));
                 tupleR[i] = readerR[i].readLine();
-
+                
+                if (tupleR[i] == null) {
+                    finishedR[i] = true;
+                }
+                else {
+                    finishedR[i] = false;
+                }
             }
             
             for (int i=0; i<SFC; i++) {
                 String fname = "tmp/S" + (i+1);
                 readerS[i] = new BufferedReader(new FileReader(fname));
                 tupleS[i] = readerS[i].readLine();
-
+                
+                if (tupleS[i] == null) {
+                    finishedS[i] = true;
+                }
+                else {
+                    finishedS[i] = false;
+                }
             }
+
 
             // Find the minimum y in R
             int min_index = find_minimum(tupleR, 1);
             String y = tupleR[min_index];
             // System.out.println("min index = " + min_index);
             for (int i=0; i<SFC; i++) {
-                while(true) {
+                while(!finishedS[i]) {
                     int comp = compare_R_S(y, tupleS[i]);
                     // If equal then join
                     if (comp == 0) {
@@ -250,10 +267,19 @@ class SortJoin {
                         writer.println(join_tuples(y, tupleS[i]));
                         // increment pointer, read next line
                         tupleS[i] = readerS[i].readLine();
+                        
+                        if (tupleS[i] == null) {
+                            finishedS[i] = true;
+                        }
                     }
+
                     else if (comp > 0) {
                         // meaning S is smaller than R, then drop that tuple in S
                         tupleS[i] = readerS[i].readLine();
+
+                        if (tupleS[i] == null) {
+                            finishedS[i] = true;
+                        }
                     }
                     else {
                         break;
