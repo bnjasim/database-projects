@@ -283,7 +283,7 @@ class SortJoin {
             // finished become true only when all finishedR become true or all finishedS become true
             boolean finished = false;
 
-            //while(!finished) {
+            while(!finished) {
                 // Find the minimum y in R
                 int min_index = find_minimum(tupleR, finishedR, 1);
                 String y = tupleR[min_index];
@@ -317,7 +317,7 @@ class SortJoin {
                     }
                 }
 
-                System.out.println("Number of tuples in R with 000: " + listR.size());
+                // System.out.println("Number of tuples in R with 000: " + listR.size());
 
                 // Add all tuples with Y=y from S to listS
                 for (int i=0; i<SFC; i++) {
@@ -351,11 +351,30 @@ class SortJoin {
                     }
                 }
 
-                System.out.println("Number of tuples in S with 000: " + listS.size());
+               //  System.out.println("Number of tuples in S with 000: " + listS.size());
 
                 // Cross product of listR and listS
                 write_cross_product(writer, listR, listS);
-            //}
+
+                // Check if finished or not
+                boolean t1 = true, t2 = true;
+                for (int i=0; i<RFC; i++) {
+                    if (!finishedR[i]) {
+                        t1 = false;
+                        break;
+                    }
+                }
+
+                for (int i=0; i<SFC; i++) {
+                    if (!finishedS[i]) {
+                        t2 = false;
+                        break;
+                    }
+                }
+
+                finished = t1 | t2;
+
+            }
 
             writer.flush();
             writer.close();
