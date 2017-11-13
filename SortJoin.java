@@ -148,7 +148,7 @@ class SortJoin {
                     String outfile = outpath + "S" + fileCount;
                     // Now Sort Data
                     //Arrays.sort(Data, getComparator(0));
-                    Data.sort(getComparator(1));
+                    Data.sort(getComparator(0));
                     write_to_file(Data, outfile, lineCount);
 
                     // reset line count
@@ -168,7 +168,7 @@ class SortJoin {
             SFC = fileCount;
             // Now Sort Data
             //Arrays.sort(Data, getComparator(0));
-            Data.sort(getComparator(1));
+            Data.sort(getComparator(0));
             write_to_file(Data, outfile, lineCount);
 
             System.out.println("# tupleLimit = " + tupleLimit);
@@ -238,6 +238,7 @@ class SortJoin {
                 writer.println(join_tuples(listR.get(i), listS.get(j)));
             }
         }
+        writer.flush();
     }
 
     public void getnext() {
