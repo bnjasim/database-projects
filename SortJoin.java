@@ -104,8 +104,13 @@ class SortJoin {
             String outfile = outpath + "R" + fileCount;
             // R Files Count
             RFC = fileCount;
+            for (int i=0; i<Data.length;i++) {
+                System.out.println(Data[i]);
+            }
+            System.out.println("length of Data = "+ Data.length);
             // Now Sort Data
             Arrays.sort(Data, getComparator(1));
+
             write_to_file(Data, outfile, lineCount);
 
             // System.out.println("# tupleLimit = " + tupleLimit);
@@ -119,6 +124,7 @@ class SortJoin {
 
         catch(Exception e){
             System.out.println(e);
+            e.printStackTrace();
             System.exit(1);
         }
 
@@ -175,7 +181,7 @@ class SortJoin {
     }
 
     // Returns the index of which file in R splits having the minimum value
-    private int find_minimum(String[] tupleR, boolean[] finishedR, int col) {
+    private int find_minimum(String[] tupleR, boolean[] finishedR) {
         // String m = arr[0]; // can't do as first sublist may be finished
         String m = "";
         int index = -1;
@@ -185,13 +191,17 @@ class SortJoin {
             if (!finishedR[i]) {
                 m = tupleR[i];
                 index = i;
+                break;
             }
         }
         i += 1;
 
+        //System.out.println("m = " + m);
+
         for (; i<tupleR.length; i++) {
             if (!finishedR[i]) {
-                if (getComparator(col).compare(tupleR[i], m) < 0) {
+                if (compare_R_R(tupleR[i], m) < 0) {
+                //if (getComparator(col).compare(tupleR[i], m) < 0) {
                     m = tupleR[i];
                     index = i;
                 }
@@ -283,9 +293,12 @@ class SortJoin {
             // finished become true only when all finishedR become true or all finishedS become true
             boolean finished = false;
 
+            int iteration = 1;
+
             while(!finished) {
+
                 // Find the minimum y in R
-                int min_index = find_minimum(tupleR, finishedR, 1);
+                int min_index = find_minimum(tupleR, finishedR);
                 String y = tupleR[min_index];
                 
                 // Add all tuples with Y=y from R to listR
@@ -311,12 +324,15 @@ class SortJoin {
                         else {
                             // something seriously wrong
                             // y is the minimum assumption is wrong or S is not sorted
-                            System.out.println("Fatal Mistake: y is not minimum or S is not sorted\n");
+                            System.out.println("iteration = " + iteration);
+                            System.out.println("y = " + y + "  R = " + tupleR[i]);
+                            System.out.println("Fatal Mistake: y is not minimum\n");
                             System.exit(1);
                         }
                     }
                 }
 
+                iteration += 1;
                 // System.out.println("Number of tuples in R with 000: " + listR.size());
 
                 // Add all tuples with Y=y from S to listS
@@ -355,6 +371,9 @@ class SortJoin {
 
                 // Cross product of listR and listS
                 write_cross_product(writer, listR, listS);
+                // clear the arrraylists
+                listR.clear();
+                listS.clear();
 
                 // Check if finished or not
                 boolean t1 = true, t2 = true;
@@ -397,15 +416,15 @@ class SortJoin {
 	public static void main(String[] args) {
         // TODO - command line inputs
         int M = 50;
-		String fileR = "input/R";
-        String fileS = "input/S";
+		String fileR = "input/sample1";
+        String fileS = "input/sample2";
            
         SortJoin sortJoin = new SortJoin(50);
 
 		long startTime = System.currentTimeMillis();
         
-        // sortJoin.open(fileR, fileS);
-        sortJoin.getnext();
+        sortJoin.open(fileR, fileS);
+        //sortJoin.getnext();
 
         long endTime = System.currentTimeMillis();
         long totalTime = endTime - startTime;
