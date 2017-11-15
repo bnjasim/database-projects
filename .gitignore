@@ -3,3 +3,8 @@
 *.py
 *.class
 *.tar.gz
+*.class
+tmp/*
+input/output
+*.zip
+input/
